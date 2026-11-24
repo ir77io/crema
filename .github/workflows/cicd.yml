@@ -2,11 +2,10 @@ name: Build for macOS
 
 on:
   push:
-    branches:
-      - '*'
+    branches: [main]
   pull_request:
-    branches:
-      - '*'
+    branches: [main]
+  workflow_dispatch:
 
 # https://stackoverflow.com/a/72408109/6942800
 concurrency:
