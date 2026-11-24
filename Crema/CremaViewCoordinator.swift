@@ -52,6 +52,8 @@ class CremaViewCoordinator: ObservableObject {
 
     @Published var currentView: NotchViews = .home
     @Published var helloAnimationRunning: Bool = false
+    /// Cup-filling launch animation (see CremaPourView). Replaces the old hello snake.
+    @Published var launchPourRunning: Bool = false
     private var sneakPeekDispatch: DispatchWorkItem?
     private var expandingViewDispatch: DispatchWorkItem?
     private var hudEnableTask: Task<Void, Never>?
@@ -162,7 +164,8 @@ class CremaViewCoordinator: ObservableObject {
             }
 
         Task { @MainActor in
-            helloAnimationRunning = firstLaunch
+            // Play the cup-filling animation on every launch unless Reduce Motion is on.
+            launchPourRunning = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
 
             if Defaults[.hudReplacement] {
                 let authorized = await XPCHelperClient.shared.isAccessibilityAuthorized()

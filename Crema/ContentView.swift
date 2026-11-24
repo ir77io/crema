@@ -38,7 +38,9 @@ struct ContentView: View {
     @Default(.showNotHumanFace) var showNotHumanFace
 
     // Shared interactive spring for movement/resizing to avoid conflicting animations
-    private let animationSpring = Animation.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)
+    private let animationSpring = CremaMotion.hover
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let extendedHoverPadding: CGFloat = 30
     private let zeroHeightHoverPadding: CGFloat = 10
@@ -102,6 +104,13 @@ struct ContentView: View {
                     .padding([.horizontal, .bottom], vm.notchState == .open ? 12 : 0)
                     .background(.black)
                     .clipShape(currentNotchShape)
+                    .overlay {
+                        // Closed: the app disappears into the notch, leaving a thin rim of crema around it.
+                        currentNotchShape
+                            .stroke(CremaPalette.rim, lineWidth: 1.5)
+                            .opacity(vm.notchState == .closed && vm.effectiveClosedNotchHeight > 0 ? 1 : 0)
+                            .allowsHitTesting(false)
+                    }
                     .overlay(alignment: .top) {
                         Rectangle()
                             .fill(.black)
@@ -120,11 +129,8 @@ struct ContentView: View {
                 mainLayout
                     .frame(height: vm.notchState == .open ? vm.notchSize.height : nil)
                     .conditionalModifier(true) { view in
-                        let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8, blendDuration: 0)
-                        let closeAnimation = Animation.spring(response: 0.45, dampingFraction: 1.0, blendDuration: 0)
-                        
-                        return view
-                            .animation(vm.notchState == .open ? openAnimation : closeAnimation, value: vm.notchState)
+                        view
+                            .animation(CremaMotion.shape(open: vm.notchState == .open, reduceMotion: reduceMotion), value: vm.notchState)
                             .animation(.smooth, value: gestureProgress)
                     }
                     .contentShape(Rectangle())
@@ -200,6 +206,18 @@ struct ContentView: View {
                         .fill(Color.black.opacity(0.01))
                         .frame(width: computedChinWidth, height: vm.chinHeight)
                 }
+            }
+        }
+        .overlay(alignment: .top) {
+            if coordinator.launchPourRunning {
+                CremaPourView(
+                    // The first launch gets the full pour; later launches play a faster one.
+                    timeScale: coordinator.firstLaunch ? 1 : 1.8,
+                    closedSize: vm.closedNotchSize,
+                    onFinish: {
+                        coordinator.launchPourRunning = false
+                    }
+                )
             }
         }
         .padding(.bottom, 8)
@@ -352,9 +370,12 @@ struct ContentView: View {
                     }
                 }
                 .transition(
-                    .scale(scale: 0.8, anchor: .top)
-                    .combined(with: .opacity)
-                    .animation(.smooth(duration: 0.35))
+                    .asymmetric(
+                        insertion: .scale(scale: 0.85, anchor: .top)
+                            .combined(with: .opacity)
+                            .animation(CremaMotion.contentIn(reduceMotion: reduceMotion)),
+                        removal: .opacity.animation(CremaMotion.contentOut)
+                    )
                 )
                 .zIndex(1)
                 .allowsHitTesting(vm.notchState == .open)
@@ -503,7 +524,7 @@ struct ContentView: View {
     }
 
     private func doOpen() {
-        withAnimation(animationSpring) {
+        withAnimation(CremaMotion.shape(open: true, reduceMotion: reduceMotion)) {
             vm.open()
         }
     }
