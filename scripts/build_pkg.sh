@@ -26,7 +26,9 @@ echo "==> Building Release app"
 if [[ -n "${APP_IDENTITY:-}" ]]; then
     SIGN=(CODE_SIGN_IDENTITY="$APP_IDENTITY" CODE_SIGN_STYLE=Manual OTHER_CODE_SIGN_FLAGS="--timestamp" ENABLE_HARDENED_RUNTIME=YES)
 else
-    SIGN=(CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="")
+    # Ad-hoc signing has no Team ID, so Hardened Runtime's library validation would refuse to load
+    # the embedded frameworks (dyld: "different Team IDs"). Turn it off for ad-hoc builds only.
+    SIGN=(CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" ENABLE_HARDENED_RUNTIME=NO)
 fi
 xcodebuild -project "$APP_NAME.xcodeproj" -scheme "$APP_NAME" -configuration Release \
     -destination "generic/platform=macOS" ARCHS=arm64 ONLY_ACTIVE_ARCH=NO -derivedDataPath "$DERIVED" "${SIGN[@]}" build | tail -3
