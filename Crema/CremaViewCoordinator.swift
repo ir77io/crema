@@ -51,15 +51,13 @@ class CremaViewCoordinator: ObservableObject {
     static let shared = CremaViewCoordinator()
 
     @Published var currentView: NotchViews = .home
-    @Published var helloAnimationRunning: Bool = false
-    /// Cup-filling launch animation (see CremaPourView). Replaces the old hello snake.
+    /// Cup-filling launch animation (see CremaPourView).
     @Published var launchPourRunning: Bool = false
     private var sneakPeekDispatch: DispatchWorkItem?
     private var expandingViewDispatch: DispatchWorkItem?
     private var hudEnableTask: Task<Void, Never>?
 
     @AppStorage("firstLaunch") var firstLaunch: Bool = true
-    @AppStorage("showWhatsNew") var showWhatsNew: Bool = true
     @AppStorage("musicLiveActivityEnabled") var musicLiveActivityEnabled: Bool = true
     @AppStorage("currentMicStatus") var currentMicStatus: Bool = true
 

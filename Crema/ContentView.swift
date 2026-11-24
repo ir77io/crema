@@ -264,93 +264,81 @@ struct ContentView: View {
     func NotchLayout() -> some View {
         VStack(alignment: .leading) {
             VStack(alignment: .leading) {
-                if coordinator.helloAnimationRunning {
-                    Spacer()
-                    HelloAnimation(onFinish: {
-                        vm.closeHello()
-                    }).frame(
-                        width: getClosedNotchSize().width,
-                        height: 80
-                    )
-                    .padding(.top, 40)
-                    Spacer()
-                } else {
-                    if coordinator.expandingView.type == .battery && coordinator.expandingView.show
-                        && vm.notchState == .closed && Defaults[.showPowerStatusNotifications]
-                    {
-                        HStack(spacing: 0) {
-                            HStack {
-                                Text(batteryModel.statusText)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.white)
-                            }
-
-                            Rectangle()
-                                .fill(.black)
-                                .frame(width: vm.closedNotchSize.width + 10)
-
-                            HStack {
-                                CremaBatteryView(
-                                    batteryWidth: 30,
-                                    isCharging: batteryModel.isCharging,
-                                    isInLowPowerMode: batteryModel.isInLowPowerMode,
-                                    isPluggedIn: batteryModel.isPluggedIn,
-                                    levelBattery: batteryModel.levelBattery,
-                                    isForNotification: true
-                                )
-                            }
-                            .frame(width: 76, alignment: .trailing)
+                if coordinator.expandingView.type == .battery && coordinator.expandingView.show
+                    && vm.notchState == .closed && Defaults[.showPowerStatusNotifications]
+                {
+                    HStack(spacing: 0) {
+                        HStack {
+                            Text(batteryModel.statusText)
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
                         }
-                        .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
-                      } else if coordinator.sneakPeek.show && Defaults[.inlineHUD] && (coordinator.sneakPeek.type != .music) && (coordinator.sneakPeek.type != .battery) && vm.notchState == .closed {
-                          InlineHUD(type: $coordinator.sneakPeek.type, value: $coordinator.sneakPeek.value, icon: $coordinator.sneakPeek.icon, hoverAnimation: $isHovering, gestureProgress: $gestureProgress)
-                              .transition(.opacity)
-                      } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
-                          MusicLiveActivity()
-                              .frame(alignment: .center)
-                      } else if !coordinator.expandingView.show && vm.notchState == .closed && (!musicManager.isPlaying && musicManager.isPlayerIdle) && Defaults[.showNotHumanFace] && !vm.hideOnClosed  {
-                          CremaFaceAnimation()
-                       } else if vm.notchState == .open {
-                           CremaHeader()
-                               .frame(height: max(24, vm.effectiveClosedNotchHeight))
-                               .opacity(gestureProgress != 0 ? 1.0 - min(abs(gestureProgress) * 0.1, 0.3) : 1.0)
-                       } else {
-                           Rectangle().fill(.clear).frame(width: vm.closedNotchSize.width - 20, height: vm.effectiveClosedNotchHeight)
-                       }
 
-                      if coordinator.sneakPeek.show {
-                          if (coordinator.sneakPeek.type != .music) && (coordinator.sneakPeek.type != .battery) && !Defaults[.inlineHUD] && vm.notchState == .closed {
-                              SystemEventIndicatorModifier(
-                                  eventType: $coordinator.sneakPeek.type,
-                                  value: $coordinator.sneakPeek.value,
-                                  icon: $coordinator.sneakPeek.icon,
-                                  sendEventBack: { newVal in
-                                      switch coordinator.sneakPeek.type {
-                                      case .volume:
-                                          VolumeManager.shared.setAbsolute(Float32(newVal))
-                                      case .brightness:
-                                          BrightnessManager.shared.setAbsolute(value: Float32(newVal))
-                                      default:
-                                          break
-                                      }
+                        Rectangle()
+                            .fill(.black)
+                            .frame(width: vm.closedNotchSize.width + 10)
+
+                        HStack {
+                            CremaBatteryView(
+                                batteryWidth: 30,
+                                isCharging: batteryModel.isCharging,
+                                isInLowPowerMode: batteryModel.isInLowPowerMode,
+                                isPluggedIn: batteryModel.isPluggedIn,
+                                levelBattery: batteryModel.levelBattery,
+                                isForNotification: true
+                            )
+                        }
+                        .frame(width: 76, alignment: .trailing)
+                    }
+                    .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
+                  } else if coordinator.sneakPeek.show && Defaults[.inlineHUD] && (coordinator.sneakPeek.type != .music) && (coordinator.sneakPeek.type != .battery) && vm.notchState == .closed {
+                      InlineHUD(type: $coordinator.sneakPeek.type, value: $coordinator.sneakPeek.value, icon: $coordinator.sneakPeek.icon, hoverAnimation: $isHovering, gestureProgress: $gestureProgress)
+                          .transition(.opacity)
+                  } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
+                      MusicLiveActivity()
+                          .frame(alignment: .center)
+                  } else if !coordinator.expandingView.show && vm.notchState == .closed && (!musicManager.isPlaying && musicManager.isPlayerIdle) && Defaults[.showNotHumanFace] && !vm.hideOnClosed  {
+                      CremaFaceAnimation()
+                   } else if vm.notchState == .open {
+                       CremaHeader()
+                           .frame(height: max(24, vm.effectiveClosedNotchHeight))
+                           .opacity(gestureProgress != 0 ? 1.0 - min(abs(gestureProgress) * 0.1, 0.3) : 1.0)
+                   } else {
+                       Rectangle().fill(.clear).frame(width: vm.closedNotchSize.width - 20, height: vm.effectiveClosedNotchHeight)
+                   }
+
+                  if coordinator.sneakPeek.show {
+                      if (coordinator.sneakPeek.type != .music) && (coordinator.sneakPeek.type != .battery) && !Defaults[.inlineHUD] && vm.notchState == .closed {
+                          SystemEventIndicatorModifier(
+                              eventType: $coordinator.sneakPeek.type,
+                              value: $coordinator.sneakPeek.value,
+                              icon: $coordinator.sneakPeek.icon,
+                              sendEventBack: { newVal in
+                                  switch coordinator.sneakPeek.type {
+                                  case .volume:
+                                      VolumeManager.shared.setAbsolute(Float32(newVal))
+                                  case .brightness:
+                                      BrightnessManager.shared.setAbsolute(value: Float32(newVal))
+                                  default:
+                                      break
                                   }
-                              )
-                              .padding(.bottom, 10)
-                              .padding(.leading, 4)
-                              .padding(.trailing, 8)
-                          }
-                          // Old sneak peek music
-                          else if coordinator.sneakPeek.type == .music {
-                              if vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard {
-                                  HStack(alignment: .center) {
-                                      Image(systemName: "music.note")
-                                      GeometryReader { geo in
-                                          MarqueeText(.constant(musicManager.songTitle + " - " + musicManager.artistName),  textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray, minDuration: 1, frameWidth: geo.size.width)
-                                      }
-                                  }
-                                  .foregroundStyle(.gray)
-                                  .padding(.bottom, 10)
                               }
+                          )
+                          .padding(.bottom, 10)
+                          .padding(.leading, 4)
+                          .padding(.trailing, 8)
+                      }
+                      // Old sneak peek music
+                      else if coordinator.sneakPeek.type == .music {
+                          if vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard {
+                              HStack(alignment: .center) {
+                                  Image(systemName: "music.note")
+                                  GeometryReader { geo in
+                                      MarqueeText(.constant(musicManager.songTitle + " - " + musicManager.artistName),  textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray, minDuration: 1, frameWidth: geo.size.width)
+                                  }
+                              }
+                              .foregroundStyle(.gray)
+                              .padding(.bottom, 10)
                           }
                       }
                   }
