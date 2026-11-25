@@ -59,9 +59,7 @@ class SettingsWindowController: NSWindowController {
     }
     
     func showWindow() {
-        // Set app to regular mode first
-        NSApp.setActivationPolicy(.regular)
-        
+        // Crema stays a menu-bar-only app (no Dock icon) even while Settings is open.
         // If window is already visible, bring it to front properly
         if window?.isVisible == true {
             NSApp.activate(ignoringOtherApps: true)
@@ -91,9 +89,6 @@ class SettingsWindowController: NSWindowController {
     
     private func relinquishFocus() {
         window?.orderOut(nil)
-        
-        // Set app back to accessory mode immediately
-        NSApp.setActivationPolicy(.accessory)
     }
 }
 
@@ -104,11 +99,6 @@ extension SettingsWindowController: NSWindowDelegate {
     
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         return true
-    }
-    
-    func windowDidBecomeKey(_ notification: Notification) {
-        // Ensure app is in regular mode when window becomes key
-        NSApp.setActivationPolicy(.regular)
     }
     
     func windowDidResignKey(_ notification: Notification) {

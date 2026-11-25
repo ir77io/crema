@@ -239,6 +239,11 @@ struct Media: View {
                     isOn: $coordinator.musicLiveActivityEnabled.animation()
                 )
                 Toggle("Pop out a notification when the song changes", isOn: $enableSneakPeek)
+                Button("Preview a notification") {
+                    coordinator.showBanner(
+                        NotchBanner(symbol: "cup.and.saucer.fill", title: "Crema", subtitle: "This is what a notification looks like"),
+                        duration: 4)
+                }
                 Picker(
                     selection: $hideNotchOption,
                     label:
