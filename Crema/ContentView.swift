@@ -190,7 +190,7 @@ struct ContentView: View {
             if coordinator.launchPourRunning {
                 CremaPourView(
                     // The first launch gets the full pour; later launches play a faster one.
-                    timeScale: Double(ProcessInfo.processInfo.environment["CREMA_POUR_SCALE"] ?? "") ?? (coordinator.firstLaunch ? 1 : 1.8), // TEMP-SCALE
+                    timeScale: coordinator.firstLaunch ? 1 : 1.8,
                     closedSize: vm.closedNotchSize,
                     onFinish: {
                         coordinator.launchPourRunning = false

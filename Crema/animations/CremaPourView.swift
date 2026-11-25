@@ -125,13 +125,23 @@ struct CremaPourView: View {
             base + amp * sin(x * 0.035 + phase)
         }
 
+        // Liquid edges are sampled once, at the same x positions, and run past the cup walls (the
+        // clip trims them), so the espresso, the crema and the sides never leave black slivers.
+        let xa = x0 - 24, xb = x1 + 24, n = 48
+        func edge(_ base: CGFloat, _ amp: CGFloat, _ phase: CGFloat) -> [CGPoint] {
+            (0...n).map { i in
+                let x = xa + (xb - xa) * CGFloat(i) / CGFloat(n)
+                return CGPoint(x: x, y: wave(x, base, amp, phase))
+            }
+        }
+        let espEdge = edge(yE, ampE, ph)
+
         // Espresso.
         if e > 0.005 {
             var path = Path()
-            path.move(to: CGPoint(x: x0, y: h + 4))
-            var x = x0
-            while x <= x1 { path.addLine(to: CGPoint(x: x, y: wave(x, yE, ampE, ph))); x += 8 }
-            path.addLine(to: CGPoint(x: x1, y: h + 4))
+            path.move(to: CGPoint(x: xa, y: h + 8))
+            for pt in espEdge { path.addLine(to: pt) }
+            path.addLine(to: CGPoint(x: xb, y: h + 8))
             path.closeSubpath()
             gc.fill(path, with: .color(espressoColor))
         }
@@ -139,22 +149,21 @@ struct CremaPourView: View {
         // Crema layer between the espresso and the notch, with a pale surface line.
         if c > 0.01 {
             let cph = ph * 0.7 + 1
+            let cremaEdge = edge(yC, ampC, cph)
+
+            // The crema's underside is the espresso's top edge, nudged down so the layers overlap.
             var body = Path()
-            body.move(to: CGPoint(x: x0, y: wave(x0, yC, ampC, cph)))
-            var x = x0 + 8
-            while x <= x1 { body.addLine(to: CGPoint(x: x, y: wave(x, yC, ampC, cph))); x += 8 }
-            x = x1
-            while x >= x0 { body.addLine(to: CGPoint(x: x, y: wave(x, yE, ampE, ph))); x -= 8 }
+            body.move(to: cremaEdge[0])
+            for pt in cremaEdge.dropFirst() { body.addLine(to: pt) }
+            for pt in espEdge.reversed() { body.addLine(to: CGPoint(x: pt.x, y: pt.y + 2)) }
             body.closeSubpath()
             gc.fill(body, with: .color(cremaColor))
 
             let lip = max(2, c * 7)
             var surface = Path()
-            surface.move(to: CGPoint(x: x0, y: wave(x0, yC, ampC, cph)))
-            x = x0 + 8
-            while x <= x1 { surface.addLine(to: CGPoint(x: x, y: wave(x, yC, ampC, cph))); x += 8 }
-            x = x1
-            while x >= x0 { surface.addLine(to: CGPoint(x: x, y: wave(x, yC, ampC, cph) + lip)); x -= 8 }
+            surface.move(to: cremaEdge[0])
+            for pt in cremaEdge.dropFirst() { surface.addLine(to: pt) }
+            for pt in cremaEdge.reversed() { surface.addLine(to: CGPoint(x: pt.x, y: pt.y + lip)) }
             surface.closeSubpath()
             gc.fill(surface, with: .color(cremaSurface))
 
