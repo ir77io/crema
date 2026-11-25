@@ -41,6 +41,9 @@ struct CremaPourTimeline {
 }
 
 struct CremaPourView: View {
+    /// Size of the cup body that hangs below the menu bar strip.
+    static let cupSize = CGSize(width: 320, height: 76)
+
     /// 1 plays at the designed speed; larger plays faster (used after the first launch).
     var timeScale: Double = 1
     var closedSize: CGSize
@@ -63,7 +66,7 @@ struct CremaPourView: View {
             }
             .opacity(1 - tl.dissolve)
         }
-        .frame(width: openNotchSize.width, height: openNotchSize.height)
+        .frame(width: Self.cupSize.width + 40, height: closedSize.height + Self.cupSize.height + 12)
         .allowsHitTesting(false)
         .task {
             start = Date()
@@ -80,12 +83,12 @@ struct CremaPourView: View {
         // (height `mb`) so menu items stay visible, and only widens below it.
         let mb = closedSize.height
         let nw = closedSize.width
-        let bodyW = lerp(nw, openNotchSize.width, p)
-        let bodyH = max(0, lerp(0, openNotchSize.height - mb, p))
+        let bodyW = lerp(nw, Self.cupSize.width, p)
+        let bodyH = max(0, lerp(0, Self.cupSize.height, p))
         let h = mb + bodyH
         let top = cornerRadiusInsets.closed.top
         let rTop = min(10, bodyH / 2)
-        let rBot = min(cornerRadiusInsets.opened.bottom, bodyH / 2, bodyW / 2)
+        let rBot = min(18, bodyH / 2, bodyW / 2)
         let cx = size.width / 2
         let nL = cx - nw / 2, nR = cx + nw / 2
         let x0 = cx - bodyW / 2, x1 = cx + bodyW / 2

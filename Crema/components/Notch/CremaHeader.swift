@@ -10,19 +10,24 @@ import SwiftUI
 
 struct CremaHeader: View {
     @EnvironmentObject var vm: CremaViewModel
-    @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var coordinator = CremaViewCoordinator.shared
     @StateObject var tvm = ShelfStateViewModel.shared
+
+    private var showTabs: Bool {
+        (!tvm.isEmpty || coordinator.alwaysShowTabs) && Defaults[.cremaShelf]
+    }
+
     var body: some View {
         HStack(spacing: 0) {
-            HStack {
-                if (!tvm.isEmpty || coordinator.alwaysShowTabs) && Defaults[.cremaShelf] {
-                    TabSelectionView()
-                } else if vm.notchState == .open {
-                    EmptyView()
+            // Left side: Home and the shelf (AirDrop), sitting right beside the notch.
+            HStack(spacing: 2) {
+                if showTabs {
+                    NotchTabButton(tab: .home)
+                    NotchTabButton(tab: .shelf)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.trailing, 6)
+            .frame(maxWidth: .infinity, alignment: .trailing)
             .opacity(vm.notchState == .closed ? 0 : 1)
             .blur(radius: vm.notchState == .closed ? 20 : 0)
             .zIndex(2)
@@ -36,59 +41,28 @@ struct CremaHeader: View {
                     }
             }
 
+            // Right side: volume, then settings.
             HStack(spacing: 4) {
                 if vm.notchState == .open {
-                    if isHUDType(coordinator.sneakPeek.type) && coordinator.sneakPeek.show && Defaults[.showOpenNotchHUD] {
-                        OpenNotchHUD(type: $coordinator.sneakPeek.type, value: $coordinator.sneakPeek.value, icon: $coordinator.sneakPeek.icon)
-                            .transition(.scale(scale: 0.8).combined(with: .opacity))
-                    } else {
-                        if Defaults[.showMirror] {
-                            Button(action: {
-                                vm.toggleCameraPreview()
-                            }) {
-                                Capsule()
-                                    .fill(.black)
-                                    .frame(width: 30, height: 30)
-                                    .overlay {
-                                        Image(systemName: "web.camera")
-                                            .foregroundColor(.white)
-                                            .padding()
-                                            .imageScale(.medium)
-                                    }
+                    VolumeBar()
+                        .padding(.trailing, 6)
+                    if Defaults[.settingsIconInNotch] {
+                        Button(action: {
+                            DispatchQueue.main.async {
+                                SettingsWindowController.shared.showWindow()
                             }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                        if Defaults[.settingsIconInNotch] {
-                            Button(action: {
-                                DispatchQueue.main.async {
-                                    SettingsWindowController.shared.showWindow()
+                        }) {
+                            Capsule()
+                                .fill(.black)
+                                .frame(width: 30, height: 30)
+                                .overlay {
+                                    Image(systemName: "gear")
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .imageScale(.medium)
                                 }
-                                
-                            }) {
-                                Capsule()
-                                    .fill(.black)
-                                    .frame(width: 30, height: 30)
-                                    .overlay {
-                                        Image(systemName: "gear")
-                                            .foregroundColor(.white)
-                                            .padding()
-                                            .imageScale(.medium)
-                                    }
-                            }
-                            .buttonStyle(PlainButtonStyle())
                         }
-                        if Defaults[.showBatteryIndicator] {
-                            CremaBatteryView(
-                                batteryWidth: 30,
-                                isCharging: batteryModel.isCharging,
-                                isInLowPowerMode: batteryModel.isInLowPowerMode,
-                                isPluggedIn: batteryModel.isPluggedIn,
-                                levelBattery: batteryModel.levelBattery,
-                                maxCapacity: batteryModel.maxCapacity,
-                                timeToFullCharge: batteryModel.timeToFullCharge,
-                                isForNotification: false
-                            )
-                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
@@ -100,15 +74,6 @@ struct CremaHeader: View {
         }
         .foregroundColor(.gray)
         .environmentObject(vm)
-    }
-
-    func isHUDType(_ type: SneakContentType) -> Bool {
-        switch type {
-        case .volume, .brightness, .backlight, .mic:
-            return true
-        default:
-            return false
-        }
     }
 }
 

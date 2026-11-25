@@ -47,6 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var quickShareService = QuickShareService.shared
     var timer: Timer?
     var closeNotchTask: Task<Void, Never>?
+    private var keepAliveActivity: NSObjectProtocol?
     private var previousScreens: [NSScreen]?
     private var onboardingWindowController: NSWindowController?
     private var screenLockedObserver: Any?
@@ -267,6 +268,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Crema is an always-on overlay with no regular windows, so macOS would otherwise treat it
+        // as idle: quit it (automatic termination) or throttle it (App Nap).
+        ProcessInfo.processInfo.disableAutomaticTermination("Crema keeps the notch running")
+        ProcessInfo.processInfo.disableSuddenTermination()
+        keepAliveActivity = ProcessInfo.processInfo.beginActivity(
+            options: [.userInitiatedAllowingIdleSystemSleep, .automaticTerminationDisabled, .suddenTerminationDisabled],
+            reason: "Crema keeps the notch responsive")
 
         NotificationCenter.default.addObserver(
             self,
