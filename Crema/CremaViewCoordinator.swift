@@ -41,6 +41,9 @@ class CremaViewCoordinator: ObservableObject {
     @Published var currentView: NotchViews = .home
     /// Cup-filling launch animation (see CremaPourView).
     @Published var launchPourRunning: Bool = false
+    /// Compact pop-out shown under the closed notch (song changes, upcoming events).
+    @Published var banner: NotchBanner?
+    private var bannerTask: Task<Void, Never>?
     private var sneakPeekDispatch: DispatchWorkItem?
     private var expandingViewDispatch: DispatchWorkItem?
 
@@ -191,6 +194,27 @@ class CremaViewCoordinator: ObservableObject {
         }
     }
     
+    func showBanner(_ banner: NotchBanner, duration: TimeInterval = 3) {
+        bannerTask?.cancel()
+        withAnimation(CremaMotion.shape(open: true)) {
+            self.banner = banner
+        }
+        bannerTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(duration))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                withAnimation(CremaMotion.shape(open: false)) {
+                    self?.banner = nil
+                }
+            }
+        }
+    }
+
+    func hideBanner() {
+        bannerTask?.cancel()
+        withAnimation(CremaMotion.shape(open: false)) { banner = nil }
+    }
+
     func showEmpty() {
         currentView = .home
     }

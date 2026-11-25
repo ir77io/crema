@@ -238,7 +238,7 @@ struct Media: View {
                     "Show music live activity",
                     isOn: $coordinator.musicLiveActivityEnabled.animation()
                 )
-                Toggle("Show sneak peek on playback changes", isOn: $enableSneakPeek)
+                Toggle("Pop out a notification when the song changes", isOn: $enableSneakPeek)
                 Picker(
                     selection: $hideNotchOption,
                     label:
@@ -304,6 +304,9 @@ struct CalendarSettings: View {
             }
             Defaults.Toggle(key: .hideAllDayEvents) {
                 Text("Hide all-day events")
+            }
+            Defaults.Toggle(key: .showEventBanners) {
+                Text("Pop out a notification before events start")
             }
             Section(header: Text("Calendars")) {
                 if calendarManager.calendarAuthorizationStatus != .fullAccess {

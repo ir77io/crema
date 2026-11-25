@@ -255,22 +255,11 @@ struct ContentView: View {
                        Rectangle().fill(.clear).frame(width: vm.closedNotchSize.width - 20, height: vm.effectiveClosedNotchHeight)
                    }
 
-                  if coordinator.sneakPeek.show {
-                      if coordinator.sneakPeek.type == .music {
-                          if vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard {
-                              HStack(alignment: .center) {
-                                  Image(systemName: "music.note")
-                                  GeometryReader { geo in
-                                      MarqueeText(.constant(musicManager.songTitle + " - " + musicManager.artistName),  textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray, minDuration: 1, frameWidth: geo.size.width)
-                                  }
-                              }
-                              .foregroundStyle(.gray)
-                              .padding(.bottom, 10)
-                          }
-                      }
+                  if let banner = coordinator.banner, vm.notchState == .closed, !vm.hideOnClosed {
+                      NotchBannerCard(banner: banner)
                   }
               }
-              .conditionalModifier((coordinator.sneakPeek.show && (coordinator.sneakPeek.type == .music) && vm.notchState == .closed && !vm.hideOnClosed && Defaults[.sneakPeekStyles] == .standard)) { view in
+              .conditionalModifier(coordinator.banner != nil && vm.notchState == .closed && !vm.hideOnClosed) { view in
                   view
                       .fixedSize()
               }

@@ -352,11 +352,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let newStatus = !self.coordinator.expandingView.show
                 self.coordinator.toggleExpandingView(status: newStatus, type: .music)
             } else {
-                self.coordinator.toggleSneakPeek(
-                    status: !self.coordinator.sneakPeek.show,
-                    type: .music,
-                    duration: 3.0
-                )
+                if self.coordinator.banner != nil {
+                    self.coordinator.hideBanner()
+                } else {
+                    let music = MusicManager.shared
+                    self.coordinator.showBanner(
+                        NotchBanner(image: music.albumArt, title: music.songTitle, subtitle: music.artistName),
+                        duration: 3)
+                }
             }
         }
 
@@ -416,6 +419,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         setupDragDetectors()
+        UpcomingEventNotifier.shared.start()
 
         if coordinator.firstLaunch {
             DispatchQueue.main.async {

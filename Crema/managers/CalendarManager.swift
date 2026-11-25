@@ -193,6 +193,20 @@ class CalendarManager: ObservableObject {
         self.events = eventsResult
     }
     
+    /// Timed events starting within `window` seconds from now (or in the last minute).
+    func eventsStarting(within window: TimeInterval) async -> [EventModel] {
+        let now = Date()
+        let list = await calendarService.events(
+            from: now.addingTimeInterval(-60),
+            to: now.addingTimeInterval(window),
+            calendars: selectedCalendars.map { $0.id })
+        return list.filter { event in
+            guard !event.isAllDay, event.start >= now.addingTimeInterval(-60) else { return false }
+            if case .event = event.type { return true }
+            return false
+        }
+    }
+
     func setReminderCompleted(reminderID: String, completed: Bool) async {
         await calendarService.setReminderCompleted(reminderID: reminderID, completed: completed)
         // Refresh events after updating

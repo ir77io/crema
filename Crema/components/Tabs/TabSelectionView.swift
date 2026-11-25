@@ -13,8 +13,8 @@ struct TabModel: Identifiable {
     let icon: String
     let view: NotchViews
 
-    static let home = TabModel(label: "Home", icon: "house.fill", view: .home)
-    static let shelf = TabModel(label: "Shelf", icon: "tray.fill", view: .shelf)
+    static let home = TabModel(label: "Home", icon: "cup.and.saucer.fill", view: .home)
+    static let shelf = TabModel(label: "Shelf", icon: "tray.and.arrow.down.fill", view: .shelf)
 }
 
 /// One icon button for a notch tab. The header puts Home and the shelf (AirDrop) side by side next to the notch.

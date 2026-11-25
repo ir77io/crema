@@ -585,7 +585,8 @@ class MusicManager: ObservableObject {
     private func updateSneakPeek() {
         if isPlaying && Defaults[.enableSneakPeek] {
             if Defaults[.sneakPeekStyles] == .standard {
-                coordinator.toggleSneakPeek(status: true, type: .music)
+                coordinator.showBanner(
+                    NotchBanner(image: albumArt, title: songTitle, subtitle: artistName))
             } else {
                 coordinator.toggleExpandingView(status: true, type: .music)
             }

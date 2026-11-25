@@ -41,8 +41,8 @@ struct CremaHeader: View {
                     }
             }
 
-            // Right side: volume, then settings.
-            HStack(spacing: 4) {
+            // Right side: volume, then settings, sitting right beside the notch like the tabs on the left.
+            HStack(spacing: 2) {
                 if vm.notchState == .open {
                     VolumeBar()
                         .padding(.trailing, 6)
@@ -67,7 +67,8 @@ struct CremaHeader: View {
                 }
             }
             .font(.system(.headline, design: .rounded))
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.leading, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .opacity(vm.notchState == .closed ? 0 : 1)
             .blur(radius: vm.notchState == .closed ? 20 : 0)
             .zIndex(2)
